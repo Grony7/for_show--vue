@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import type { TaskRow } from '@/entities/task'
+import type { TaskRow, TaskStatusPreset } from '@/entities/task'
 import type { ReportSection } from '../model/types'
 import { buildReport } from './buildReport'
-import type { ReportTemplates } from './buildReport'
+import type { BuildReportInput, ReportTemplates } from './buildReport'
 
 const templates: ReportTemplates = {
   lineTemplate: '- {statusText} №{id} - {title} ({duration})',
@@ -11,13 +11,18 @@ const templates: ReportTemplates = {
   linkTemplate: 'https://bitrix.example.com/tasks/{id}',
 }
 
+const statuses: TaskStatusPreset[] = [
+  { id: 'done', label: 'Выполнил задачу', shortLabel: 'Выполнил' },
+  { id: 'started', label: 'Начал выполнение задачи', shortLabel: 'Начал' },
+]
+
 function buildTask(overrides: Partial<TaskRow> = {}): TaskRow {
   return {
     id: 100,
     title: 'Задача',
     durationText: '1 ч. 0м.',
     nestingLevel: 0,
-    status: 'DONE',
+    statusId: 'done',
     isIncluded: true,
     ...overrides,
   }
@@ -34,15 +39,21 @@ function buildSection(overrides: Partial<ReportSection> = {}): ReportSection {
   }
 }
 
+function buildInput(overrides: Partial<BuildReportInput> = {}): BuildReportInput {
+  return {
+    sections: [buildSection()],
+    templates,
+    statuses,
+    reportDate: '2026-08-27',
+    grandTotalText: '54 ч. 48м.',
+    shouldFlattenHierarchy: false,
+    ...overrides,
+  }
+}
+
 describe('buildReport', () => {
   it('подставляет ID проекта и замороженные итоги в отчёт', () => {
-    const buildResult = buildReport({
-      sections: [buildSection()],
-      templates,
-      reportDate: '2026-08-27',
-      grandTotalText: '54 ч. 48м.',
-      shouldFlattenHierarchy: false,
-    })
+    const buildResult = buildReport(buildInput())
 
     expect(buildResult.markdownReportText).toBe(
       [
@@ -57,6 +68,22 @@ describe('buildReport', () => {
     )
   })
 
+  it('подставляет текст статуса по его идентификатору', () => {
+    const buildResult = buildReport(
+      buildInput({ sections: [buildSection({ taskRows: [buildTask({ statusId: 'started' })] })] }),
+    )
+
+    expect(buildResult.markdownReportText).toContain('- Начал выполнение задачи №100')
+  })
+
+  it('оставляет текст статуса пустым, если статус удалён из настроек', () => {
+    const buildResult = buildReport(
+      buildInput({ sections: [buildSection({ taskRows: [buildTask({ statusId: 'removed' })] })] }),
+    )
+
+    expect(buildResult.markdownReportText).toContain('-  №100 - Задача')
+  })
+
   it('сохраняет вложенность отступами и убирает её в плоском режиме', () => {
     const sections = [
       buildSection({
@@ -64,20 +91,8 @@ describe('buildReport', () => {
       }),
     ]
 
-    const nestedResult = buildReport({
-      sections,
-      templates,
-      reportDate: '2026-08-27',
-      grandTotalText: '1 ч. 0м.',
-      shouldFlattenHierarchy: false,
-    })
-    const flatResult = buildReport({
-      sections,
-      templates,
-      reportDate: '2026-08-27',
-      grandTotalText: '1 ч. 0м.',
-      shouldFlattenHierarchy: true,
-    })
+    const nestedResult = buildReport(buildInput({ sections }))
+    const flatResult = buildReport(buildInput({ sections, shouldFlattenHierarchy: true }))
 
     expect(nestedResult.markdownReportText).toContain('    - Выполнил задачу №2 - Подзадача')
     expect(flatResult.markdownReportText).toContain('- Выполнил задачу №2 - Подзадача')
@@ -85,17 +100,15 @@ describe('buildReport', () => {
   })
 
   it('не пересчитывает «Итого» при исключении задачи из отчёта', () => {
-    const buildResult = buildReport({
-      sections: [
-        buildSection({
-          taskRows: [buildTask({ id: 1 }), buildTask({ id: 2, isIncluded: false })],
-        }),
-      ],
-      templates,
-      reportDate: '2026-08-27',
-      grandTotalText: '54 ч. 48м.',
-      shouldFlattenHierarchy: false,
-    })
+    const buildResult = buildReport(
+      buildInput({
+        sections: [
+          buildSection({
+            taskRows: [buildTask({ id: 1 }), buildTask({ id: 2, isIncluded: false })],
+          }),
+        ],
+      }),
+    )
 
     expect(buildResult.markdownReportText).toContain('Итого: 4 ч. 10м.')
     expect(buildResult.markdownReportText).toContain('№1')
@@ -103,30 +116,25 @@ describe('buildReport', () => {
   })
 
   it('пропускает раздел, из которого исключены все задачи', () => {
-    const buildResult = buildReport({
-      sections: [buildSection({ taskRows: [buildTask({ isIncluded: false })] })],
-      templates,
-      reportDate: '2026-08-27',
-      grandTotalText: '0 ч. 0м.',
-      shouldFlattenHierarchy: false,
-    })
+    const buildResult = buildReport(
+      buildInput({ sections: [buildSection({ taskRows: [buildTask({ isIncluded: false })] })] }),
+    )
 
     expect(buildResult.markdownReportText).not.toContain('Внутренние задачи')
   })
 
   it('подставляет ID группы и ID задачи в ссылку', () => {
-    const buildResult = buildReport({
-      sections: [buildSection({ matchedProjectId: 13, taskRows: [buildTask({ id: 4820 })] })],
-      templates: {
-        ...templates,
-        lineTemplate: '- {statusText} №[{id}]({link}) - {title}',
-        linkTemplate:
-          'https://bitrix.example.com/workgroups/group/{projectId}/tasks/task/view/{id}/',
-      },
-      reportDate: '2026-08-27',
-      grandTotalText: '1 ч. 0м.',
-      shouldFlattenHierarchy: false,
-    })
+    const buildResult = buildReport(
+      buildInput({
+        sections: [buildSection({ matchedProjectId: 13, taskRows: [buildTask({ id: 4820 })] })],
+        templates: {
+          ...templates,
+          lineTemplate: '- {statusText} №[{id}]({link}) - {title}',
+          linkTemplate:
+            'https://bitrix.example.com/workgroups/group/{projectId}/tasks/task/view/{id}/',
+        },
+      }),
+    )
 
     expect(buildResult.markdownReportText).toContain(
       '- Выполнил задачу №[4820](https://bitrix.example.com/workgroups/group/13/tasks/task/view/4820/) - Задача',
@@ -134,17 +142,16 @@ describe('buildReport', () => {
   })
 
   it('предупреждает, что без ID группы ссылка окажется неполной', () => {
-    const buildResult = buildReport({
-      sections: [buildSection({ matchedProjectId: null })],
-      templates: {
-        ...templates,
-        linkTemplate:
-          'https://bitrix.example.com/workgroups/group/{projectId}/tasks/task/view/{id}/',
-      },
-      reportDate: '2026-08-27',
-      grandTotalText: '1 ч. 0м.',
-      shouldFlattenHierarchy: false,
-    })
+    const buildResult = buildReport(
+      buildInput({
+        sections: [buildSection({ matchedProjectId: null })],
+        templates: {
+          ...templates,
+          linkTemplate:
+            'https://bitrix.example.com/workgroups/group/{projectId}/tasks/task/view/{id}/',
+        },
+      }),
+    )
 
     expect(buildResult.issues).toContainEqual(
       expect.objectContaining({
@@ -155,13 +162,9 @@ describe('buildReport', () => {
   })
 
   it('предупреждает о разделе без ID проекта', () => {
-    const buildResult = buildReport({
-      sections: [buildSection({ matchedProjectId: null })],
-      templates,
-      reportDate: '2026-08-27',
-      grandTotalText: '1 ч. 0м.',
-      shouldFlattenHierarchy: false,
-    })
+    const buildResult = buildReport(
+      buildInput({ sections: [buildSection({ matchedProjectId: null })] }),
+    )
 
     expect(buildResult.issues).toContainEqual(
       expect.objectContaining({
@@ -172,13 +175,9 @@ describe('buildReport', () => {
   })
 
   it('дописывает отсутствующие обязательные переменные в шаблоны', () => {
-    const buildResult = buildReport({
-      sections: [buildSection()],
-      templates: { ...templates, documentTemplate: 'Отчёт за {date}' },
-      reportDate: '2026-08-27',
-      grandTotalText: '1 ч. 0м.',
-      shouldFlattenHierarchy: false,
-    })
+    const buildResult = buildReport(
+      buildInput({ templates: { ...templates, documentTemplate: 'Отчёт за {date}' } }),
+    )
 
     expect(buildResult.markdownReportText).toContain('## Внутренние задачи (#1001)')
     expect(buildResult.issues).toContainEqual(

@@ -1,2 +1,2 @@
-export type { ReportSettings } from './model/types'
+export type { ReportSettings, TemplatePreset } from './model/types'
 export { useSettingsStore } from './model/settingsStore'

@@ -1,5 +1,5 @@
 import type { TaskRow } from '@/entities/task'
-import { defaultTaskStatus } from '@/entities/task'
+import { defaultTaskStatusId } from '@/entities/task'
 import type { BitrixParsingResult, ParseIssue, RawSection } from '../model/types'
 import {
   arrowGlobalPattern,
@@ -21,7 +21,10 @@ function countNestingLevel(arrowsText: string): number {
   return arrowsText.match(arrowGlobalPattern)?.length ?? 0
 }
 
-function buildTaskRow(groups: Record<string, string | undefined>): TaskRow | null {
+function buildTaskRow(
+  groups: Record<string, string | undefined>,
+  statusId: string,
+): TaskRow | null {
   const taskId = Number(groups.id)
 
   if (!Number.isInteger(taskId) || taskId <= 0) {
@@ -33,7 +36,7 @@ function buildTaskRow(groups: Record<string, string | undefined>): TaskRow | nul
     title: (groups.title ?? '').trim(),
     durationText: `${Number(groups.hours)} ч. ${Number(groups.minutes)}м.`,
     nestingLevel: countNestingLevel(groups.arrows ?? ''),
-    status: defaultTaskStatus,
+    statusId,
     isIncluded: true,
   }
 }
@@ -42,7 +45,10 @@ function createSection(rawName: string): RawSection {
   return { rawName, taskRows: [], sectionTotalText: null }
 }
 
-export function parseBitrixText(rawInputText: string): BitrixParsingResult {
+export function parseBitrixText(
+  rawInputText: string,
+  defaultStatusId: string = defaultTaskStatusId,
+): BitrixParsingResult {
   const rawLines = rawInputText.split(/\r?\n/)
   const sections: RawSection[] = []
   const parsingIssues: ParseIssue[] = []
@@ -105,7 +111,7 @@ export function parseBitrixText(rawInputText: string): BitrixParsingResult {
 
     const taskMatch = taskLinePattern.exec(line)
     if (taskMatch?.groups) {
-      const taskRow = buildTaskRow(taskMatch.groups)
+      const taskRow = buildTaskRow(taskMatch.groups, defaultStatusId)
 
       if (!taskRow) {
         parsingIssues.push({

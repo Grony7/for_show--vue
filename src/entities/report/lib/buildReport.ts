@@ -11,8 +11,7 @@ import {
   formatReportDate,
   renderTemplate,
 } from '@/shared/lib'
-import type { TaskRow } from '@/entities/task'
-import { taskStatusLabelByValue } from '@/entities/task'
+import type { TaskRow, TaskStatusPreset } from '@/entities/task'
 import type { ReportSection } from '../model/types'
 import {
   documentTemplateVariableNames,
@@ -39,6 +38,7 @@ export interface ReportTemplates {
 export interface BuildReportInput {
   sections: ReportSection[]
   templates: ReportTemplates
+  statuses: TaskStatusPreset[]
   reportDate: string
   grandTotalText: string | null
   shouldFlattenHierarchy: boolean
@@ -77,12 +77,13 @@ function buildLineVariables(
   taskRow: TaskRow,
   projectId: number | null,
   linkTemplate: string,
+  statusLabelById: Map<string, string>,
 ): LineTemplateVariables {
   return {
     id: String(taskRow.id),
     title: taskRow.title,
     duration: taskRow.durationText,
-    statusText: taskStatusLabelByValue[taskRow.status],
+    statusText: statusLabelById.get(taskRow.statusId) ?? '',
     projectId: projectId === null ? '' : String(projectId),
     link: buildTaskLink(taskRow.id, projectId, linkTemplate),
   }
@@ -119,6 +120,10 @@ export function buildReport(buildReportInput: BuildReportInput): BuildReportResu
     defaultTaskLinkTemplate,
   ).includes('{projectId}')
 
+  const statusLabelById = new Map(
+    buildReportInput.statuses.map((status) => [status.id, status.label]),
+  )
+
   const renderedSectionTexts: string[] = []
 
   buildReportInput.sections.forEach((reportSection) => {
@@ -135,6 +140,7 @@ export function buildReport(buildReportInput: BuildReportInput): BuildReportResu
           taskRow,
           reportSection.matchedProjectId,
           buildReportInput.templates.linkTemplate,
+          statusLabelById,
         ),
         lineTemplateVariableNames,
         'lineTemplate',

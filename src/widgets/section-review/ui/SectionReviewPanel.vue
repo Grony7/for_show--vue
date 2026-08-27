@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { BaseButton, BasePanel } from '@/shared/ui'
-import { taskStatusShortLabelByValue, taskStatusValues } from '@/entities/task'
 import { useReportStore } from '@/entities/report'
+import { useSettingsStore } from '@/entities/settings'
 import SectionCard from './SectionCard.vue'
 
 const reportStore = useReportStore()
+const settingsStore = useSettingsStore()
 </script>
 
 <template>
@@ -14,12 +15,13 @@ const reportStore = useReportStore()
   >
     <template #actions>
       <BaseButton
-        v-for="taskStatus in taskStatusValues"
-        :key="taskStatus"
+        v-for="status in settingsStore.statuses"
+        :key="status.id"
         size="small"
-        @click="reportStore.applyStatusToAllTasks(taskStatus)"
+        :title="status.label"
+        @click="reportStore.applyStatusToAllTasks(status.id)"
       >
-        Всем: {{ taskStatusShortLabelByValue[taskStatus] }}
+        Всем: {{ status.shortLabel }}
       </BaseButton>
     </template>
 

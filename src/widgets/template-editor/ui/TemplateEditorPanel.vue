@@ -8,6 +8,7 @@ import {
 } from '@/entities/report'
 import { useSettingsStore } from '@/entities/settings'
 import { TemplateField } from '@/features/edit-templates'
+import { TemplatePresetTabs } from '@/features/manage-templates'
 
 const reportStore = useReportStore()
 const settingsStore = useSettingsStore()
@@ -28,7 +29,9 @@ function updateFlattenHierarchy(event: Event): void {
 <template>
   <BasePanel title="Шаблоны отчёта" subtitle="Настройки сохраняются автоматически.">
     <template #actions>
-      <BaseButton size="small" @click="settingsStore.resetTemplates()">Сбросить шаблоны</BaseButton>
+      <BaseButton size="small" @click="settingsStore.resetActivePresetTemplates()">
+        Сбросить набор
+      </BaseButton>
     </template>
 
     <div class="editor__row">
@@ -52,10 +55,12 @@ function updateFlattenHierarchy(event: Event): void {
           @input="updateLinkTemplate"
         />
         <span class="editor__hint">
-          {{ '{id}' }} — ID задачи, {{ '{projectId}' }} — ID группы из реестра проектов.
+          {{ '{id}' }} — ID задачи, {{ '{projectId}' }} — ID группы. Ссылка общая для всех наборов.
         </span>
       </label>
     </div>
+
+    <TemplatePresetTabs />
 
     <label class="editor__checkbox">
       <input

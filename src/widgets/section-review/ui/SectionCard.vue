@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { BaseButton } from '@/shared/ui'
-import type { TaskStatus } from '@/entities/task'
 import type { ReportSection } from '@/entities/report'
 import { useReportStore } from '@/entities/report'
 import { useSettingsStore } from '@/entities/settings'
@@ -43,8 +42,8 @@ function updateTaskIncluded(taskId: number, event: Event): void {
   )
 }
 
-function updateTaskStatus(taskId: number, status: TaskStatus): void {
-  reportStore.setTaskStatus(props.sectionIndex, taskId, status)
+function updateTaskStatus(taskId: number, statusId: string): void {
+  reportStore.setTaskStatus(props.sectionIndex, taskId, statusId)
 }
 </script>
 
@@ -93,7 +92,7 @@ function updateTaskStatus(taskId: number, status: TaskStatus): void {
             </td>
             <td>
               <TaskStatusControl
-                :model-value="taskRow.status"
+                :model-value="taskRow.statusId"
                 @update:model-value="updateTaskStatus(taskRow.id, $event)"
               />
             </td>

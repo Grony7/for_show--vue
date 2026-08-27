@@ -1,36 +1,33 @@
 <script setup lang="ts">
-import type { TaskStatus } from '@/entities/task'
-import {
-  taskStatusLabelByValue,
-  taskStatusShortLabelByValue,
-  taskStatusValues,
-} from '@/entities/task'
+import { useSettingsStore } from '@/entities/settings'
 
 defineProps<{
-  modelValue: TaskStatus
+  modelValue: string
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [status: TaskStatus]
+  'update:modelValue': [statusId: string]
 }>()
 
-function selectStatus(status: TaskStatus): void {
-  emit('update:modelValue', status)
+const settingsStore = useSettingsStore()
+
+function selectStatus(statusId: string): void {
+  emit('update:modelValue', statusId)
 }
 </script>
 
 <template>
   <div class="status" role="group" aria-label="Статус задачи">
     <button
-      v-for="taskStatus in taskStatusValues"
-      :key="taskStatus"
+      v-for="status in settingsStore.statuses"
+      :key="status.id"
       type="button"
       class="status__button"
-      :class="{ 'status__button--active': modelValue === taskStatus }"
-      :title="taskStatusLabelByValue[taskStatus]"
-      @click="selectStatus(taskStatus)"
+      :class="{ 'status__button--active': modelValue === status.id }"
+      :title="status.label"
+      @click="selectStatus(status.id)"
     >
-      {{ taskStatusShortLabelByValue[taskStatus] }}
+      {{ status.shortLabel }}
     </button>
   </div>
 </template>

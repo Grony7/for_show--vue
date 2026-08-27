@@ -3,6 +3,7 @@ import { ProjectRegistryPanel } from '@/widgets/project-registry'
 import { ReportInputPanel } from '@/widgets/report-input'
 import { ReportPreviewPanel } from '@/widgets/report-preview'
 import { SectionReviewPanel } from '@/widgets/section-review'
+import { StatusEditorPanel } from '@/widgets/status-editor'
 import { TemplateEditorPanel } from '@/widgets/template-editor'
 </script>
 
@@ -23,6 +24,7 @@ import { TemplateEditorPanel } from '@/widgets/template-editor'
       </div>
 
       <div class="page__column">
+        <StatusEditorPanel />
         <TemplateEditorPanel />
         <ReportPreviewPanel />
       </div>

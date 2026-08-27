@@ -1,7 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { buildDefaultReportDate } from '@/shared/lib'
-import type { TaskStatus } from '@/entities/task'
 import { useSettingsStore } from '@/entities/settings'
 import { buildReport } from '../lib/buildReport'
 import { matchSectionsToProjects } from '../lib/matchSectionsToProjects'
@@ -18,9 +17,19 @@ export const useReportStore = defineStore('report', () => {
   const reportDate = ref(buildDefaultReportDate())
   const informationMessage = ref<string | null>(null)
 
-  const reportSections = computed(() =>
-    matchSectionsToProjects(rawSections.value, settingsStore.projects),
-  )
+  const reportSections = computed(() => {
+    const knownStatusIds = new Set(settingsStore.statuses.map((status) => status.id))
+    const fallbackStatusId = settingsStore.defaultStatusId
+
+    const sectionsWithKnownStatuses = rawSections.value.map((rawSection) => ({
+      ...rawSection,
+      taskRows: rawSection.taskRows.map((taskRow) =>
+        knownStatusIds.has(taskRow.statusId) ? taskRow : { ...taskRow, statusId: fallbackStatusId },
+      ),
+    }))
+
+    return matchSectionsToProjects(sectionsWithKnownStatuses, settingsStore.projects)
+  })
 
   const unmatchedSectionNames = computed(() =>
     reportSections.value
@@ -32,6 +41,7 @@ export const useReportStore = defineStore('report', () => {
     buildReport({
       sections: reportSections.value,
       templates: settingsStore.templates,
+      statuses: settingsStore.statuses,
       reportDate: reportDate.value,
       grandTotalText: grandTotalText.value,
       shouldFlattenHierarchy: settingsStore.shouldFlattenHierarchy,
@@ -59,7 +69,7 @@ export const useReportStore = defineStore('report', () => {
   )
 
   function parseRawInput(): void {
-    const parsingResult = parseBitrixText(rawInputText.value)
+    const parsingResult = parseBitrixText(rawInputText.value, settingsStore.defaultStatusId)
 
     rawSections.value = parsingResult.sections
     grandTotalText.value = parsingResult.grandTotalText
@@ -100,7 +110,7 @@ export const useReportStore = defineStore('report', () => {
     )
   }
 
-  function setTaskStatus(sectionIndex: number, taskId: number, status: TaskStatus): void {
+  function setTaskStatus(sectionIndex: number, taskId: number, statusId: string): void {
     const targetSection = rawSections.value[sectionIndex]
 
     if (!targetSection) {
@@ -108,14 +118,14 @@ export const useReportStore = defineStore('report', () => {
     }
 
     targetSection.taskRows = targetSection.taskRows.map((taskRow) =>
-      taskRow.id === taskId ? { ...taskRow, status } : taskRow,
+      taskRow.id === taskId ? { ...taskRow, statusId } : taskRow,
     )
   }
 
-  function applyStatusToAllTasks(status: TaskStatus): void {
+  function applyStatusToAllTasks(statusId: string): void {
     rawSections.value = rawSections.value.map((rawSection) => ({
       ...rawSection,
-      taskRows: rawSection.taskRows.map((taskRow) => ({ ...taskRow, status })),
+      taskRows: rawSection.taskRows.map((taskRow) => ({ ...taskRow, statusId })),
     }))
     informationMessage.value = 'Статус применён ко всем задачам.'
   }
