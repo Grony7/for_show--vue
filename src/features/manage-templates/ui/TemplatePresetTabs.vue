@@ -64,7 +64,7 @@ function renameActivePreset(event: Event): void {
     <form v-if="isCreating" class="presets__create" @submit.prevent="confirmCreating">
       <input
         v-model="newPresetName"
-        class="presets__input"
+        class="presets__input presets__input--grow"
         type="text"
         placeholder="Название, например «Mattermost»"
         aria-label="Название нового набора шаблонов"
@@ -185,8 +185,12 @@ function renameActivePreset(event: Event): void {
 
     font-size: 0.85rem;
     padding: 6px 10px;
-    flex: 1 1 200px;
+    width: 100%;
     min-width: 0;
+
+    &--grow {
+      flex: 1 1 200px;
+    }
   }
 }
 </style>
