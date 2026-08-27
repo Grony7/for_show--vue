@@ -90,14 +90,14 @@ function updateTaskStatus(taskId: number, statusId: string): void {
                 @change="updateTaskIncluded(taskRow.id, $event)"
               />
             </td>
-            <td>
+            <td class="section__cell--status">
               <TaskStatusControl
                 :model-value="taskRow.statusId"
                 @update:model-value="updateTaskStatus(taskRow.id, $event)"
               />
             </td>
             <td class="section__cell--id">{{ taskRow.id }}</td>
-            <td>
+            <td class="section__cell--title">
               <span :style="buildTitleIndentStyle(taskRow.nestingLevel)" class="section__title">
                 <span
                   v-if="taskRow.nestingLevel > 0 && !settingsStore.shouldFlattenHierarchy"
@@ -196,6 +196,36 @@ function updateTaskStatus(taskId: number, statusId: string): void {
       vertical-align: middle;
       color: var(--text);
     }
+
+    @include below($breakpoint-mobile) {
+      display: block;
+
+      thead {
+        display: none;
+      }
+
+      tbody {
+        display: block;
+      }
+
+      tr {
+        display: grid;
+        grid-template-columns: auto auto 1fr;
+        grid-template-areas:
+          'check id time'
+          'title title title'
+          'status status status';
+        gap: 6px 10px;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      td {
+        padding: 0;
+        border: none;
+      }
+    }
   }
 
   &__row--excluded {
@@ -206,12 +236,23 @@ function updateTaskStatus(taskId: number, statusId: string): void {
     &--narrow {
       width: 1%;
       white-space: nowrap;
+
+      @include below($breakpoint-mobile) {
+        width: auto;
+        grid-area: check;
+      }
     }
 
     &--id {
       @include mono;
 
       color: var(--text-muted);
+
+      @include below($breakpoint-mobile) {
+        grid-area: id;
+        font-weight: 600;
+        color: var(--text-strong);
+      }
     }
 
     &--time {
@@ -219,6 +260,23 @@ function updateTaskStatus(taskId: number, statusId: string): void {
 
       white-space: nowrap;
       color: var(--text-muted);
+
+      @include below($breakpoint-mobile) {
+        grid-area: time;
+        text-align: right;
+      }
+    }
+
+    &--title {
+      @include below($breakpoint-mobile) {
+        grid-area: title;
+      }
+    }
+
+    &--status {
+      @include below($breakpoint-mobile) {
+        grid-area: status;
+      }
     }
   }
 

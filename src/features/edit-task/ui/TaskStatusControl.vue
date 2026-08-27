@@ -39,6 +39,12 @@ function selectStatus(statusId: string): void {
   border-radius: $radius-control;
   overflow: hidden;
 
+  @include below($breakpoint-mobile) {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
   &__button {
     border: none;
     background: transparent;
@@ -51,6 +57,11 @@ function selectStatus(statusId: string): void {
     transition:
       background-color 0.15s ease,
       color 0.15s ease;
+
+    @include below($breakpoint-mobile) {
+      flex: 1 1 auto;
+      padding: 8px 10px;
+    }
 
     & + & {
       border-left: 1px solid var(--border);

@@ -44,6 +44,11 @@ import { TemplateEditorPanel } from '@/widgets/template-editor'
     padding: 24px 16px 48px;
   }
 
+  @include below($breakpoint-mobile) {
+    gap: 16px;
+    padding: 16px 12px 32px;
+  }
+
   &__header {
     @include stack(6px);
   }
@@ -54,12 +59,20 @@ import { TemplateEditorPanel } from '@/widgets/template-editor'
     font-weight: 650;
     color: var(--text-strong);
     letter-spacing: -0.01em;
+
+    @include below($breakpoint-mobile) {
+      font-size: 1.2rem;
+    }
   }
 
   &__subtitle {
     margin: 0;
     font-size: 0.92rem;
     color: var(--text-muted);
+
+    @include below($breakpoint-mobile) {
+      font-size: 0.85rem;
+    }
   }
 
   &__grid {
@@ -77,6 +90,10 @@ import { TemplateEditorPanel } from '@/widgets/template-editor'
     @include stack(20px);
 
     min-width: 0;
+
+    @include below($breakpoint-mobile) {
+      gap: 16px;
+    }
   }
 }
 </style>

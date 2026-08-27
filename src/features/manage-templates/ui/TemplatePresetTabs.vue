@@ -174,6 +174,10 @@ function renameActivePreset(event: Event): void {
 
     flex: 1 1 220px;
     min-width: 0;
+
+    @include below($breakpoint-mobile) {
+      flex-basis: 100%;
+    }
   }
 
   &__actions {

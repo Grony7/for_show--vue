@@ -32,6 +32,12 @@ defineProps<{
   border-radius: $radius-panel;
   padding: 20px;
 
+  @include below($breakpoint-mobile) {
+    gap: 12px;
+    padding: 14px;
+    border-radius: 10px;
+  }
+
   &__header {
     display: flex;
     align-items: flex-start;
@@ -45,6 +51,10 @@ defineProps<{
     font-size: 1.05rem;
     font-weight: 600;
     color: var(--text-strong);
+
+    @include below($breakpoint-mobile) {
+      font-size: 0.98rem;
+    }
   }
 
   &__subtitle {

@@ -125,11 +125,21 @@ function updateLabel(statusId: string, event: Event): void {
 
     &--short {
       width: 120px;
+
+      @include below($breakpoint-mobile) {
+        flex: 1 1 90px;
+        width: auto;
+      }
     }
 
     &--label {
       flex: 1 1 240px;
       min-width: 0;
+
+      @include below($breakpoint-mobile) {
+        flex-basis: 100%;
+        order: -1;
+      }
     }
   }
 
