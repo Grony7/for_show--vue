@@ -75,6 +75,10 @@ function appendToken(variableToken: string): void {
     line-height: 1.5;
     padding: 10px 12px;
     resize: vertical;
+
+    @include below($breakpoint-mobile) {
+      font-size: 0.8rem;
+    }
   }
 
   &__hint {

@@ -155,6 +155,11 @@ function updateProjectName(projectIndex: number, event: Event): void {
     &--name {
       flex: 1 1 220px;
       min-width: 0;
+
+      @include below($breakpoint-mobile) {
+        flex-basis: 100%;
+        order: -1;
+      }
     }
   }
 

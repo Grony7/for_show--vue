@@ -64,6 +64,11 @@ function updateRawInputText(event: Event): void {
     min-height: 220px;
     white-space: pre;
     overflow-x: auto;
+
+    @include below($breakpoint-mobile) {
+      min-height: 160px;
+      font-size: 0.8rem;
+    }
   }
 
   &__actions {

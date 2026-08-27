@@ -43,6 +43,11 @@ const buildIssueItems = computed(() =>
     @include code-area;
 
     min-height: 320px;
+
+    @include below($breakpoint-mobile) {
+      min-height: 240px;
+      font-size: 0.8rem;
+    }
   }
 }
 </style>
