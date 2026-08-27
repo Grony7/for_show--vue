@@ -1,28 +1,25 @@
-export const taskStatusValues = ['STARTED', 'CONTINUING', 'DONE', 'FINISHED'] as const
-
-export type TaskStatus = (typeof taskStatusValues)[number]
-
-export const taskStatusLabelByValue: Record<TaskStatus, string> = {
-  STARTED: 'Начал выполнение задачи',
-  CONTINUING: 'Продолжаю выполнение задачи',
-  DONE: 'Выполнил задачу',
-  FINISHED: 'Закончил выполнение задачи',
+export interface TaskStatusPreset {
+  id: string
+  label: string
+  shortLabel: string
 }
 
-export const taskStatusShortLabelByValue: Record<TaskStatus, string> = {
-  STARTED: 'Начал',
-  CONTINUING: 'Продолжаю',
-  DONE: 'Выполнил',
-  FINISHED: 'Закончил',
-}
+export const defaultTaskStatusId = 'done'
 
-export const defaultTaskStatus: TaskStatus = 'DONE'
+export function buildDefaultTaskStatuses(): TaskStatusPreset[] {
+  return [
+    { id: 'started', label: 'Начал выполнение задачи', shortLabel: 'Начал' },
+    { id: 'continuing', label: 'Продолжаю выполнение задачи', shortLabel: 'Продолжаю' },
+    { id: 'done', label: 'Выполнил задачу', shortLabel: 'Выполнил' },
+    { id: 'finished', label: 'Закончил выполнение задачи', shortLabel: 'Закончил' },
+  ]
+}
 
 export interface TaskRow {
   id: number
   title: string
   durationText: string
   nestingLevel: number
-  status: TaskStatus
+  statusId: string
   isIncluded: boolean
 }

@@ -1,6 +1,7 @@
 export { copyTextToClipboard } from './clipboard/copyTextToClipboard'
 export type { CopyTextResult } from './clipboard/copyTextToClipboard'
 export { buildDefaultReportDate, formatReportDate } from './date/reportDate'
+export { createId } from './id/createId'
 export { loadJsonFromStorage, saveJsonToStorage } from './storage/jsonStorage'
 export {
   deduplicateTemplateIssues,

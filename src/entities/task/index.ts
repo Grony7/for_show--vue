@@ -1,7 +1,2 @@
-export type { TaskRow, TaskStatus } from './model/types'
-export {
-  defaultTaskStatus,
-  taskStatusLabelByValue,
-  taskStatusShortLabelByValue,
-  taskStatusValues,
-} from './model/types'
+export type { TaskRow, TaskStatusPreset } from './model/types'
+export { buildDefaultTaskStatuses, defaultTaskStatusId } from './model/types'
