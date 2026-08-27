@@ -1,0 +1,87 @@
+:root {
+  --font-sans:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', Consolas, 'Courier New', monospace;
+
+  --background: #f6f7f9;
+  --surface: #ffffff;
+  --surface-raised: #f1f3f6;
+  --border: #dfe3e9;
+  --border-subtle: #eceef2;
+
+  --text: #2c3340;
+  --text-strong: #11151c;
+  --text-muted: #6b7480;
+
+  --accent: #2f6feb;
+  --accent-hover: #2559c4;
+  --accent-contrast: #ffffff;
+  --accent-surface: #e8f0fe;
+
+  --warning: #a1671b;
+  --warning-surface: #fdf3e2;
+  --warning-border: #f0dbb6;
+
+  --danger: #c0392b;
+  --danger-surface: #fdecea;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #14171c;
+    --surface: #1b1f26;
+    --surface-raised: #22272f;
+    --border: #2f3641;
+    --border-subtle: #262c35;
+
+    --text: #d2d8e0;
+    --text-strong: #f2f5f8;
+    --text-muted: #8b95a3;
+
+    --accent: #5b91f5;
+    --accent-hover: #7aa6f7;
+    --accent-contrast: #10141a;
+    --accent-surface: #1e2a41;
+
+    --warning: #e0b168;
+    --warning-surface: #2e2718;
+    --warning-border: #453a22;
+
+    --danger: #f0796b;
+    --danger-surface: #33201e;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input,
+textarea,
+button,
+select {
+  font-family: inherit;
+}
+
+input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
